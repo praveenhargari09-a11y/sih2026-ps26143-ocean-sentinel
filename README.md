@@ -222,7 +222,7 @@ Vessel suspicion is ranked using a 5-factor hand-tuned heuristic formula (not ma
 * **Praveen** - Team Member
 * **Sumeet** - Team Member
 * **Abhilash S M** - Team Member
-* **Teja K T** - Team Member
+* **Teja K T** - Team Member (Female) 
 * **Vishwas Mahanthina Matt** - Team Member
 
 ---
