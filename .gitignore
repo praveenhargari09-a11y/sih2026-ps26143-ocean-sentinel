@@ -33,6 +33,8 @@ data/raw/**/*.tif
 data/raw/**/*.tiff
 data/raw/**/*.nc
 data/raw/**/*.csv
+data/raw/**/*.7z
+data/raw/**/downloads/
 data/processed/**/*.tif
 data/processed/**/*.nc
 data/uploads/
