@@ -218,12 +218,12 @@ Vessel suspicion is ranked using a 5-factor hand-tuned heuristic formula (not ma
 
 **SIH 2026 | Team ID: 181109**
 
-* [Member 1 Name] - [Role]
-* [Member 2 Name] - [Role]
-* [Member 3 Name] - [Role]
-* [Member 4 Name] - [Role]
-* [Member 5 Name] - [Role]
-* [Member 6 Name] - [Role]
+* **Sanket** - Leader
+* **Praveen** - Team Member
+* **Sumeet** - Team Member
+* **Abhilash S M** - Team Member
+* **Teja K T** - Team Member
+* **Vishwas Mahanthina Matt** - Team Member
 
 ---
 
