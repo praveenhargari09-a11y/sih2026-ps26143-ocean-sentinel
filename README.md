@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🛰️ OceanSentinel
+# Ocean Sentinel
 
 ### AI-Powered Maritime Oil Spill Detection & Vessel Attribution System
 
@@ -12,74 +12,72 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **SIH 2026 — Problem Statement #26143 (NTRO)**
+**Team Ocean Sentinel (Team ID: 181109)**
 
-*Detect oil spills from SAR satellite imagery → Trace spill origin via ocean drift modeling → Identify responsible vessels using AIS correlation*
+*Detect oil spills from SAR satellite imagery → Trace spill origin via ocean drift modeling → Rank suspect vessels using AIS correlation*
 
-[Features](#-features) · [Architecture](#-architecture) · [Quick Start](#-quick-start) · [Demo](#-demo) · [API Reference](#-api-reference) · [Tech Stack](#-tech-stack)
+[Features](#-features) · [Architecture](#-architecture) · [Quick Start](#-quick-start) · [Data Provenance](#-data-provenance) · [Results](#-results)
 
 </div>
 
 ---
 
-## 📋 Overview
+## Overview
 
-OceanSentinel is a full-stack maritime intelligence platform that automates the detection, tracking, and attribution of marine oil spills. The system processes Sentinel-1 SAR (Synthetic Aperture Radar) imagery through a deep learning segmentation model, simulates oil drift trajectories using Lagrangian physics, and correlates results with vessel AIS (Automatic Identification System) data to rank suspect vessels.
+Ocean Sentinel is a full-stack maritime intelligence platform designed to automate the detection, tracking, and attribution of marine oil spills. The system operates via a **3-stage, 6-step pipeline**:
 
-### The Problem
+1. **Detection:** SAR GeoTIFF → Spill polygon (Semantic Segmentation)
+2. **Drift Modeling:** Ocean current/wind forcing → Hindcast (48h) / Forecast (72h)
+3. **Vessel Attribution:** Spatial filtering → AIS anomaly correlation → Ranked suspect list
 
-Marine oil spills cause catastrophic environmental damage to ocean ecosystems. Current detection relies heavily on manual analysis, delayed reporting, and limited vessel accountability. By the time a spill is attributed to a vessel, critical evidence windows have closed.
-
-### Our Solution
-
-OceanSentinel closes this gap with an automated 3-stage pipeline that runs in **under 30 seconds**:
-
-| Stage | Input | Output | Time |
-|-------|-------|--------|------|
-| 🔍 **Detection** | SAR GeoTIFF | Spill polygon + area + age estimate | ~5s |
-| 🌊 **Drift Modeling** | Spill location + ocean data | Origin point + forecast trajectory | ~10s |
-| 🚢 **Vessel Attribution** | Origin + AIS records | Ranked suspect list with scores | ~5s |
+> **Note on Demo Mode:** The live demo endpoints utilize synthetic/reconstructed placeholder data and a mock detector bypass to ensure the pipeline runs reliably without heavy GPU requirements or live API dependencies. The full PyTorch U-Net models are available in the codebase (`backend/detection/`).
 
 ---
 
-## ✨ Features
+## ⚠️ Limitations & Disclaimer
+* **Relative Scoring:** The vessel attribution scores are heuristic guidelines designed to rank suspects for human investigators. They do not represent a mathematical probability of guilt.
+* **Collision Incidents:** In cases of ship-to-ship collisions (e.g., Ennore 2017), multiple vessels may overlap in time and space, complicating algorithmic blame.
+* **Age Estimation:** The Fay spreading equations yield approximate release times based on assumed oil volumes.
+* **Demo Data:** The included incidents rely on reconstructed or synthetic AIS/SAR placeholders, not live raw data feeds.
+
+---
+
+## Features
 
 <table>
 <tr>
 <td width="50%">
 
-### 🧠 Deep Learning Detection
-- **U-Net with ResNet-50** encoder for SAR oil spill segmentation
-- 3-class output: background ocean · oil spill · lookalike (biogenic slick)
-- Tile-based inference with overlap merging for arbitrarily large scenes
-- Automatic **spill age estimation** using Fay's spreading equations
+### Deep Learning Detection
+- **U-Net with ResNet-50** encoder for SAR oil spill segmentation (2-channel VV+VH).
+- 3-class output: background ocean, oil spill, lookalike.
+- Automatic **spill age estimation** using Fay's spreading equations.
 
 </td>
 <td width="50%">
 
-### 🌊 Lagrangian Drift Modeling
-- **OpenDrift OpenOil** integration for physics-based particle simulation
-- Fallback synthetic Lagrangian engine (zero dependencies)
-- **Hindcast**: trace spill backward to probable release origin
-- **Forecast**: predict spill spread 48–72 hours ahead
+### Lagrangian Drift Modeling
+- **OpenDrift** integration for physics-based particle simulation.
+- Fallback synthetic Lagrangian engine (no OpenDrift dependency).
+- **Hindcast**: trace spill backward to probable release origin.
+- **Forecast**: predict spill spread 72 hours ahead.
 
 </td>
 </tr>
 <tr>
 <td width="50%">
 
-### 🚢 Vessel Attribution Engine
-- Spatial + temporal AIS filtering around estimated origin
-- Multi-criteria vessel scoring: proximity · trajectory alignment · AIS darkness · vessel type · speed anomaly
-- **DBSCAN clustering** for origin point estimation from particle endpoints
+### Vessel Attribution Engine
+- Spatial + temporal AIS filtering around the estimated origin (DBSCAN clustered).
+- Multi-criteria vessel scoring based on 5 heuristic factors.
 
 </td>
 <td width="50%">
 
-### 🗺️ Real-Time Dashboard
-- **React + Leaflet** interactive map with layer toggles
-- Real-time pipeline progress via **WebSocket** streaming
-- Vessel ranking panel with score breakdowns
-- One-click demo with pre-loaded incident scenarios
+### Real-Time Dashboard
+- **React + Leaflet** interactive map with layer toggles.
+- Real-time pipeline progress via **WebSocket** streaming.
+- Vessel ranking panel with score breakdowns.
 
 </td>
 </tr>
@@ -87,355 +85,148 @@ OceanSentinel closes this gap with an automated 3-stage pipeline that runs in **
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
-```
+```text
                     ┌──────────────────────────┐
                     │   Sentinel-1 SAR Scene   │
-                    │      (GeoTIFF)           │
                     └───────────┬──────────────┘
                                 │
                     ┌───────────▼──────────────┐
                     │   Stage 1: DETECTION     │
-                    │   ├─ SAR Preprocessing   │
-                    │   │  (σ⁰ calibration,    │
-                    │   │   speckle filter)     │
-                    │   ├─ U-Net Segmentation   │
-                    │   │  (ResNet-50 encoder)  │
-                    │   ├─ Polygon Extraction   │
-                    │   └─ Age Estimation       │
-                    │      (Fay's equations)    │
+                    │   ├─ 1. SAR Preprocess   │
+                    │   └─ 2. U-Net Segment    │
                     └───────────┬──────────────┘
-                                │ spill polygon, centroid, area
+                                │ spill polygon, age estimate
                                 │
           ┌─────────────────────▼────────────────────┐
-          │          Stage 2: DRIFT MODELING          │
-          │   ├─ CMEMS Ocean Currents + ERA5 Wind    │
-          │   ├─ Lagrangian Particle Simulation      │
-          │   │  (OpenDrift or synthetic fallback)    │
-          │   ├─ Hindcast → Release Origin           │
-          │   │  (DBSCAN clustering)                 │
-          │   └─ Forecast → 72h Spread Prediction    │
+          │          Stage 2: DRIFT MODELING         │
+          │   ├─ 3. Hindcast Simulation (48h)        │
+          │   └─ 4. Forecast Simulation (72h)        │
           └─────────────────────┬────────────────────┘
                                 │ origin (lon, lat, time)
                                 │
           ┌─────────────────────▼────────────────────┐
           │       Stage 3: VESSEL ATTRIBUTION        │
-          │   ├─ AIS Spatial + Temporal Filter       │
-          │   ├─ Anomaly Detection                   │
-          │   │  (darkness, speed deviations)         │
-          │   ├─ Multi-Criteria Scoring              │
-          │   │  ┌──────────────────────────┐        │
-          │   │  │ Proximity ........... 35%│        │
-          │   │  │ Trajectory align .... 25%│        │
-          │   │  │ AIS darkness ........ 20%│        │
-          │   │  │ Vessel type ......... 10%│        │
-          │   │  │ Speed anomaly ....... 10%│        │
-          │   │  └──────────────────────────┘        │
-          │   └─ Ranked Suspect Vessel List          │
+          │   ├─ 5. AIS Correlation                  │
+          │   └─ 6. Heuristic Scoring                │
           └─────────────────────┬────────────────────┘
                                 │
           ┌─────────────────────▼────────────────────┐
           │          INTERACTIVE DASHBOARD           │
-          │   React 18 · Leaflet · WebSocket · TW    │
-          │   ├─ Live pipeline progress bar           │
-          │   ├─ Map: spill polygon + drift tracks   │
-          │   ├─ Vessel ranking with score breakdown  │
-          │   └─ Layer toggles + incident selector   │
           └──────────────────────────────────────────┘
 ```
 
 ---
 
-## 🚀 Quick Start
+## Screenshots
 
-### Prerequisites
+*(TODO: Add UI screenshots to `docs/screenshots/`)*
 
-| Tool | Version | Purpose |
-|------|---------|---------|
-| Python | 3.11+ | Backend + ML pipeline |
-| Node.js | 20+ | Frontend build tooling |
-| Docker | 24+ | *(Optional)* Containerized deployment |
+* `![Dashboard View](docs/screenshots/dashboard.png)`
+* `![Vessel Rankings](docs/screenshots/rankings.png)`
 
-### Option 1: Local Development
+---
+
+## Quick Start
+
+### 1. Local Development
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/praveenhargari09/sih2026-ps26143-ocean-sentinel.git
+git clone https://github.com/praveenhargari09-a11y/sih2026-ps26143-ocean-sentinel.git
 cd sih2026-ps26143-ocean-sentinel
 
 # 2. Set up environment
 cp .env.example .env
-# Edit .env with your CMEMS/ERA5 credentials (optional — demo works without them)
-
-# 3. Install Python dependencies
 python -m venv venv
 venv\Scripts\activate        # Windows
 # source venv/bin/activate   # macOS/Linux
 pip install -r requirements.txt
 
-# 4. Start the backend
+# 3. Start the backend
 uvicorn backend.api.main:app --reload --host 0.0.0.0 --port 8000
 
-# 5. Start the frontend (new terminal)
+# 4. Start the frontend (new terminal)
 cd frontend
 npm install
 npm run dev
 ```
 
-Open **http://localhost:5173** — the dashboard is ready.
+Open **http://localhost:5173** to view the dashboard.
 
-### Option 2: Docker Compose
+### 2. Docker Compose
 
 ```bash
 docker-compose up --build
-# Backend:  http://localhost:8000
-# Frontend: http://localhost:5173
 ```
+- **Backend:** http://localhost:8000
+- **Frontend:** http://localhost:5173 (Maps to internal port 80 via Nginx)
 
 ---
 
-## 🎮 Demo
+## Data Provenance
 
-**No satellite data required** — the system ships with synthetic scenarios for instant demo.
+The system includes three pre-loaded demonstration scenarios. Because historical raw SAR/AIS data is often proprietary or inaccessible, we rely on reconstructions:
 
-### From the Dashboard
-Click **"Demo"** in the top bar to run the full pipeline on the Arabian Sea synthetic scenario.
-
-### From the API
-```bash
-curl http://localhost:8000/api/demo/generate
-```
-
-### Pre-loaded Incidents
-Select real incident reconstructions from the **Mission Selector** dropdown:
-
-| Incident | Year | Location | Data |
-|----------|------|----------|------|
-| Ennore Oil Spill | 2017 | Chennai, India | SAR + AIS + Ocean |
-| MV X-Press Pearl | 2021 | Sri Lanka | SAR + AIS + Ocean |
-| Arabian Sea Demo | — | Arabian Sea | Fully synthetic |
+| Incident | SAR Source | Ocean Forcing | AIS Source | Type |
+|----------|------------|---------------|------------|------|
+| **Ennore 2017** | Synthetic Placeholder | Reconstructed | MarineTraffic (Reconstructed) | `real_with_placeholders` |
+| **X-Press Pearl 2021** | Synthetic Placeholder | Reconstructed | MarineTraffic (Reconstructed) | `reconstructed` |
+| **Arabian Sea Demo** | Synthetic | Synthetic | Synthetic | `synthetic` |
 
 ---
 
-## 📁 Project Structure
+## Model Details
 
-```
-sih2026-ps26143-ocean-sentinel/
-│
-├── backend/                          # Python backend
-│   ├── api/                          # FastAPI application
-│   │   ├── main.py                   # App entry point, CORS, router setup
-│   │   ├── schemas.py                # Pydantic request/response models
-│   │   ├── pipeline.py               # 3-stage orchestration engine
-│   │   ├── pipeline_bus.py           # WebSocket event broadcaster
-│   │   ├── data_loader.py            # GeoJSON/CSV data loading
-│   │   ├── incident_resolver.py      # Filesystem resolver for incidents
-│   │   ├── db.py                     # SQLAlchemy async database setup
-│   │   └── routes/                   # API route modules
-│   │       ├── spills.py             #   /api/spills — spill CRUD
-│   │       ├── vessels.py            #   /api/vessels — vessel ranking
-│   │       ├── ais.py                #   /api/ais — AIS track queries
-│   │       ├── ocean.py              #   /api/ocean — oceanographic data
-│   │       ├── demo.py               #   /api/demo — synthetic demo runner
-│   │       ├── incidents.py          #   /api/incidents — incident loader
-│   │       └── pipeline_ws.py        #   /ws/pipeline — WebSocket progress
-│   │
-│   ├── detection/                    # SAR oil spill detection (ML)
-│   │   ├── model.py                  # U-Net architecture + loss functions
-│   │   ├── inference.py              # Production inference engine
-│   │   ├── train.py                  # Training loop with metrics logging
-│   │   ├── dataset.py                # PyTorch Dataset for SAR tiles
-│   │   ├── preprocess.py             # SAR preprocessing pipeline
-│   │   ├── evaluate.py               # Evaluation metrics (IoU, Dice)
-│   │   └── age_estimator.py          # Fay's spreading equation solver
-│   │
-│   ├── drift/                        # Ocean drift simulation
-│   │   ├── drift_engine.py           # Lagrangian particle drift engine
-│   │   ├── hindcast.py               # Backward trajectory simulation
-│   │   ├── forecast.py               # Forward trajectory prediction
-│   │   ├── origin_estimator.py       # DBSCAN-based origin clustering
-│   │   └── data_fetcher.py           # CMEMS/ERA5 data downloader
-│   │
-│   ├── db/                           # Database layer
-│   │   └── models.py                 # SQLAlchemy ORM models
-│   │
-│   └── synthetic_data/               # Synthetic data generators
-│       ├── dataset.py                # Synthetic SAR scene generator
-│       ├── ais_tracks.csv            # Pre-generated AIS tracks
-│       └── ocean_wind_currents.csv   # Pre-generated forcing data
-│
-├── frontend/                         # React frontend
-│   ├── src/
-│   │   ├── App.tsx                   # Main application component
-│   │   ├── main.tsx                  # React entry point
-│   │   ├── types.ts                  # TypeScript interfaces
-│   │   ├── index.css                 # Tailwind CSS + custom styles
-│   │   ├── api/                      # Axios API client
-│   │   ├── hooks/                    # Custom React hooks
-│   │   │   ├── useSpillData.ts       #   Spill data management
-│   │   │   └── useWebSocket.ts       #   WebSocket connection
-│   │   ├── context/                  # React context providers
-│   │   │   └── LayerContext.tsx       #   Map layer visibility
-│   │   └── components/               # UI components
-│   │       ├── MapView.tsx           #   Leaflet map container
-│   │       ├── SpillLayer.tsx        #   Spill polygon overlay
-│   │       ├── DriftLayer.tsx        #   Drift trajectory overlay
-│   │       ├── VesselLayer.tsx       #   Vessel track overlay
-│   │       ├── VesselRankingPanel.tsx #   Suspect vessel list
-│   │       ├── SpillInfoPanel.tsx    #   Spill detail panel
-│   │       ├── PipelineStatusBar.tsx #   Progress indicator
-│   │       ├── UploadPanel.tsx       #   SAR upload modal
-│   │       ├── MissionSelector.tsx   #   Incident dropdown
-│   │       └── DataSourceBadge.tsx   #   Data provenance badge
-│   ├── package.json
-│   ├── tsconfig.json
-│   ├── vite.config.ts
-│   ├── tailwind.config.js
-│   └── nginx.conf                    # Production Nginx config
-│
-├── data/                             # Data directory (gitignored)
-│   ├── raw/                          # Raw SAR/AIS/ocean data
-│   ├── processed/                    # Pipeline outputs
-│   ├── uploads/                      # User-uploaded SAR scenes
-│   ├── synthetic/                    # Synthetic data generators
-│   │   ├── scenario_config.yaml      #   Demo scenario definition
-│   │   ├── generate_sar_scene.py     #   SAR scene synthesizer
-│   │   └── generate_ais_tracks.py    #   AIS track synthesizer
-│   └── incidents/                    # Pre-loaded incident packs
-│       ├── ennore_2017/              #   Ennore oil spill (2017)
-│       ├── xpress_pearl_2021/        #   MV X-Press Pearl (2021)
-│       └── arabian_sea_demo/         #   Synthetic demo scenario
-│
-├── models/
-│   └── checkpoints/                  # Trained model weights (gitignored)
-│
-├── scripts/                          # Utility scripts
-│   ├── download_zenodo.py            # Download training data from Zenodo
-│   ├── pilot_setup.py               # One-command environment setup
-│   └── zip_project.py               # Package project for submission
-│
-├── docker-compose.yml                # Multi-container deployment
-├── Dockerfile.backend                # Backend container
-├── Dockerfile.frontend               # Frontend container (Nginx)
-├── requirements.txt                  # Python dependencies
-├── .env.example                      # Environment template
-├── .gitignore
-├── LICENSE
-└── README.md
-```
-
----
-
-## 🔌 API Reference
-
-### REST Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/health` | Health check |
-| `GET` | `/api/demo/generate` | Run full synthetic demo pipeline |
-| `GET` | `/api/incidents` | List available incident scenarios |
-| `POST` | `/api/incidents/{id}/load` | Load and run a specific incident |
-| `POST` | `/api/spills/detect` | Upload SAR scene → detect oil spill |
-| `POST` | `/api/spills/{id}/drift` | Run hindcast + forecast drift model |
-| `GET` | `/api/spills` | List all analyzed spills |
-| `GET` | `/api/vessels/{spill_id}` | Get ranked suspect vessel list |
-| `GET` | `/api/ais/track/{mmsi}` | Get AIS track for a vessel |
-| `GET` | `/api/ocean/grid` | Get ocean current grid data |
-
-### WebSocket
-
-| Endpoint | Description |
-|----------|-------------|
-| `ws://localhost:8000/ws/pipeline/{spill_id}` | Real-time pipeline progress events |
-
-**Event payload:**
-```json
-{
-  "stage": "detection | drift | vessels",
-  "percent": 45,
-  "message": "Running hindcast simulation...",
-  "spill_id": "abc123"
-}
-```
-
----
-
-## 🧪 Model Details
-
-### U-Net Segmentation
-
-| Parameter | Value |
-|-----------|-------|
-| Architecture | U-Net with skip connections |
-| Encoder | ResNet-50 (ImageNet pretrained) |
-| Input | 2-channel SAR (VV + VH polarization) |
-| Output | 3-class segmentation map |
-| Tile Size | 512 × 512 px |
-| Loss Function | Combined CrossEntropy + Dice (0.5 + 0.5) |
-| Classes | `0` Background · `1` Oil Spill · `2` Lookalike |
+### Detection Engine
+- **Architecture:** U-Net (ResNet-50) via `segmentation-models-pytorch`.
+- **Loss Function:** Combined CrossEntropy + Dice.
 
 ### Spill Age Estimation
+Uses Fay's gravity-viscous spreading equation to estimate time since release, inverted as:
 
-Uses **Fay's gravity-viscous spreading equation** to estimate time since release:
-
-$$A(t) = k_2 \cdot V^{5/6} \cdot t^{3/4}$$
-
-Inverted to solve for time given observed area.
+$$t = \left( \frac{A}{k_2 \cdot V^{5/6}} \right)^{4/3}$$
 
 ### Drift Physics
-
-**Lagrangian particle advection** with Stokes drift:
+Lagrangian particle advection incorporating wind drift:
 
 $$\frac{dx}{dt} = u_{current} + \alpha \cdot u_{wind} + \sigma \cdot \mathcal{N}(0,1)$$
 
-where $\alpha \approx 0.03$ (Stokes factor) and $\sigma$ represents turbulent diffusion.
+*(Where $\alpha \approx 0.03$ is implemented as a wind drift factor, internally referred to as `STOKES_FACTOR` in code).*
+
+### Vessel Scoring Heuristics
+Vessel suspicion is ranked using a 5-factor hand-tuned heuristic formula (not machine-learned):
+1. **Proximity:** (35%) Distance from origin point in the origin time window.
+2. **Trajectory Alignment:** (25%) Vessel course vs. slick elongation axis.
+3. **AIS Darkness:** (20%) Transponder gaps near origin time/location.
+4. **Vessel Type:** (10%) Tankers scored higher risk.
+5. **Speed Anomaly:** (10%) Unexplained slow-down or drift in the origin zone.
 
 ---
 
-## 🗃️ Datasets
+## Results
 
-| Dataset | Source | Purpose |
-|---------|--------|---------|
-| Sentinel-1 SAR Oil Spill Dataset | [Zenodo](https://zenodo.org) | U-Net training & validation |
-| CMEMS Ocean Currents | [Copernicus Marine](https://marine.copernicus.eu) | Drift model forcing |
-| ERA5 Wind Fields | [CDS](https://cds.climate.copernicus.eu) | Wind-driven drift component |
-| AIS Ship Traffic | [MarineCadastre](https://marinecadastre.gov) | Vessel attribution |
+**Detection model:** Prototype stage. 
+**Validation metrics:** TODO. 
 
-> **Note**: The demo mode works entirely with synthetic data — no external datasets required.
+*Currently, the live system bypasses GPU inference to ensure smooth demo execution using pre-generated incident topologies.*
 
 ---
 
-## 🛠️ Tech Stack
+## Team Ocean Sentinel
 
-| Layer | Technologies |
-|-------|-------------|
-| **ML / Detection** | PyTorch · segmentation-models-pytorch · albumentations · rasterio |
-| **Drift Modeling** | OpenDrift (OpenOil) · NumPy · SciPy · netCDF4 · xarray |
-| **AIS Analysis** | pandas · scikit-learn (DBSCAN) · GeoPandas · Shapely |
-| **Backend API** | FastAPI · Uvicorn · SQLAlchemy · WebSockets · Pydantic |
-| **Frontend** | React 18 · TypeScript · Vite · react-leaflet · Tailwind CSS · Recharts |
-| **Infrastructure** | Docker · Docker Compose · Nginx |
+**SIH 2026 | Team ID: 181109**
 
----
-
-## 👥 Team
-
-Built for **Smart India Hackathon 2026** — Problem Statement #26143 (NTRO)
+* [Member 1 Name] - [Role]
+* [Member 2 Name] - [Role]
+* [Member 3 Name] - [Role]
+* [Member 4 Name] - [Role]
+* [Member 5 Name] - [Role]
+* [Member 6 Name] - [Role]
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
-
----
-
-<div align="center">
-
-**Built with 🛢️ by Team OceanSentinel**
-
-*Protecting our oceans, one pixel at a time.*
-
-</div>

@@ -1,5 +1,5 @@
 /**
- * Core TypeScript interfaces for the OilGuard maritime intelligence system.
+ * Core TypeScript interfaces for the Ocean Sentinel maritime intelligence system.
  * Types mirror the FastAPI/Pydantic backend models.
  */
 

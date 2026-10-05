@@ -31,7 +31,7 @@ function TopBar({
       {/* Brand */}
       <div className="flex items-center gap-2 shrink-0">
         <span className="text-amber-400 text-base">⬡</span>
-        <span className="font-semibold text-[13px] tracking-tight text-[#e6edf3]">OilGuard</span>
+        <span className="font-semibold text-[13px] tracking-tight text-[#e6edf3]">Ocean Sentinel</span>
         <span className="text-ops-border mx-1">|</span>
         <span className="section-label">Maritime Intelligence</span>
       </div>
