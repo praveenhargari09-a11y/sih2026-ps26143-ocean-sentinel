@@ -1,0 +1,69 @@
+scenario:
+  name: "Arabian Sea Demo"
+  description: "Synthetic oil spill scenario for demonstration — NTRO PS #26143"
+
+spill:
+  centroid_lon: 68.5
+  centroid_lat: 20.3
+  area_km2: 12.5
+  shape: ellipse
+  major_axis_km: 8.0
+  minor_axis_km: 2.5
+  orientation_degrees: 45
+  acquisition_time: "2024-06-15T08:30:00Z"
+
+drift:
+  wind_speed_ms: 5.2
+  wind_direction_degrees: 225
+  current_speed_ms: 0.3
+  current_direction_degrees: 180
+  hindcast_hours: 48
+  forecast_hours: 72
+
+ais:
+  n_vessels: 8
+  time_window_hours: 72
+  guilty_vessel_mmsi: "123456789"
+  vessels:
+    - mmsi: "123456789"
+      name: "MV OCEAN STAR"
+      vessel_type: "Tanker"
+      flag: "Panama"
+      guilty: true
+      ais_gap_start: "2024-06-14T22:00:00Z"
+      ais_gap_hours: 6
+    - mmsi: "234567890"
+      name: "MV BLUE WAVE"
+      vessel_type: "Cargo"
+      flag: "Liberia"
+      guilty: false
+    - mmsi: "345678901"
+      name: "MV PACIFIC CROSS"
+      vessel_type: "Bulk Carrier"
+      flag: "Marshall Islands"
+      guilty: false
+    - mmsi: "456789012"
+      name: "MV KERALA TRADER"
+      vessel_type: "General Cargo"
+      flag: "India"
+      guilty: false
+    - mmsi: "567890123"
+      name: "MV ARABIAN QUEEN"
+      vessel_type: "Tanker"
+      flag: "UAE"
+      guilty: false
+    - mmsi: "678901234"
+      name: "MV GULF STAR"
+      vessel_type: "Cargo"
+      flag: "Bahrain"
+      guilty: false
+    - mmsi: "789012345"
+      name: "MV NORTH SEA"
+      vessel_type: "Tanker"
+      flag: "Norway"
+      guilty: false
+    - mmsi: "890123456"
+      name: "MV SEALION"
+      vessel_type: "Container"
+      flag: "Singapore"
+      guilty: false

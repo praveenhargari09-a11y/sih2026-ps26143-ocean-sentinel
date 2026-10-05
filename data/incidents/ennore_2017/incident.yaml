@@ -1,0 +1,48 @@
+incident:
+  id: ennore_2017
+  name: "2017 Ennore Port Collision"
+  description: "MT Dawn Kanchipuram & MT BW Maple collision at Kamarajar Port, Chennai — 200+ tonnes HFO spilled"
+  date: "2017-01-27T22:30:00Z"
+  data_source: "real_with_placeholders"
+
+spill:
+  centroid_lon: 80.363333
+  centroid_lat: 13.228166
+  area_km2: 22.0
+  shape: ellipse
+  major_axis_km: 6.0
+  minor_axis_km: 2.0
+  orientation_degrees: 30
+  acquisition_time: "2017-01-27T22:30:00Z"
+  sar_source: "synthetic_placeholder"
+
+drift:
+  wind_speed_ms: 4.8
+  wind_direction_degrees: 45
+  current_speed_ms: 0.25
+  current_direction_degrees: 200
+  hindcast_hours: 6
+  forecast_hours: 72
+
+ais:
+  data_source: "reconstructed_from_public_records"
+  n_vessels: 2
+  time_window_hours: 48
+  guilty_vessel_mmsi: "419000988"
+  vessels:
+    - mmsi: "419000988"
+      name: "MT Dawn Kanchipuram"
+      imo: "9116917"
+      vessel_type: "Oil Products Tanker"
+      flag: "India"
+      guilty: true
+      ais_gap_start: "2017-01-27T22:00:00Z"
+      ais_gap_hours: 4
+    - mmsi: "235101303"
+      name: "MT BW Maple"
+      imo: "9320752"
+      vessel_type: "LPG Tanker"
+      flag: "United Kingdom"
+      guilty: false
+  citations:
+    - "Vessel Identifiers (MMSI/IMO) and incident confirmation via ENVIS Centre on Coastal Zone Management and Coastal Shelter Belt (http://dzumenvis.nic.in) referring to MarineTraffic vessel pages."

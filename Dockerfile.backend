@@ -1,0 +1,28 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# System dependencies for rasterio and geospatial libraries
+RUN apt-get update && apt-get install -y \
+    gdal-bin \
+    libgdal-dev \
+    libgeos-dev \
+    libproj-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY backend/ ./backend/
+COPY data/ ./data/
+COPY models/ ./models/
+
+# Create directories
+RUN mkdir -p data/raw data/processed data/synthetic models/checkpoints
+
+EXPOSE 8000
+
+CMD ["uvicorn", "backend.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

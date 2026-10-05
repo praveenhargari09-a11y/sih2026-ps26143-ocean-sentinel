@@ -1,0 +1,79 @@
+# ============================================================
+# OceanSentinel — .gitignore
+# ============================================================
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.whl
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Environment files
+.env
+!.env.example
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data (large files — use DVC or cloud storage)
+data/raw/**/*.tif
+data/raw/**/*.tiff
+data/raw/**/*.nc
+data/raw/**/*.csv
+data/processed/**/*.tif
+data/processed/**/*.nc
+data/uploads/
+
+# Model weights (large)
+models/checkpoints/*.pt
+models/checkpoints/*.pth
+models/checkpoints/*.ckpt
+models/checkpoints/*.csv
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.cursor/
+.gemini/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/src/.env
+
+# Docker
+.docker/
+
+# Scratch / debug files
+scratch*/
+*.scratch.*

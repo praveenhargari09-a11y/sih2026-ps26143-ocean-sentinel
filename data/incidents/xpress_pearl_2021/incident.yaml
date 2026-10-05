@@ -1,0 +1,65 @@
+incident:
+  id: xpress_pearl_2021
+  name: "2021 MV X-Press Pearl Disaster"
+  description: "MV X-Press Pearl fire and sinking off Colombo. NOTE: Since this vessel caught fire itself and is a known continuous source at anchorage, this incident serves to demonstrate pipeline mechanics (drift routing, AIS correlation) rather than a genuine 'whodunit' attribution challenge. The simple Lagrangian model tracks instantaneous parcels, so backtracking a continuous stationary source yields a non-physical offset."
+  date: "2021-05-20T00:00:00Z"
+  data_source: "reconstructed"
+
+spill:
+  centroid_lon: 79.7775
+  centroid_lat: 7.0825
+  area_km2: 45.0
+  shape: ellipse
+  major_axis_km: 10.0
+  minor_axis_km: 3.5
+  orientation_degrees: 15
+  acquisition_time: "2021-05-21T06:00:00Z"
+  sar_source: "synthetic_placeholder"
+
+drift:
+  wind_speed_ms: 6.5
+  wind_direction_degrees: 240
+  current_speed_ms: 0.35
+  current_direction_degrees: 170
+  hindcast_hours: 120
+  forecast_hours: 72
+
+ais:
+  data_source: "synthetic_placeholder"
+  n_vessels: 6
+  time_window_hours: 72
+  guilty_vessel_mmsi: "563118200"
+  vessels:
+    - mmsi: "563118200"
+      name: "MV X-Press Pearl"
+      imo: "9875343"
+      vessel_type: "Container"
+      flag: "Singapore"
+      guilty: true
+      ais_gap_start: "2021-05-20T02:00:00Z"
+      ais_gap_hours: 48
+    - mmsi: "563112345"
+      name: "MV Pacific Star"
+      vessel_type: "Container"
+      flag: "Singapore"
+      guilty: false
+    - mmsi: "419008765"
+      name: "MV Mumbai Trader"
+      vessel_type: "Bulk Carrier"
+      flag: "India"
+      guilty: false
+    - mmsi: "416002345"
+      name: "MV Lanka Pride"
+      vessel_type: "Cargo"
+      flag: "Sri Lanka"
+      guilty: false
+    - mmsi: "538009876"
+      name: "MV Ocean Venture"
+      vessel_type: "Tanker"
+      flag: "Marshall Islands"
+      guilty: false
+    - mmsi: "477005678"
+      name: "MV Eastern Dragon"
+      vessel_type: "Container"
+      flag: "Hong Kong"
+      guilty: false
